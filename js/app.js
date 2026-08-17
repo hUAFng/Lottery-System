@@ -10,7 +10,7 @@
 
 /* ---------- 配置（发布时改 CONFIG.IS_DEV 为 false） ---------- */
 var CONFIG = {
-  IS_DEV: true,                              // 正式版请改为 false（隐藏退出登录）
+  IS_DEV: false,                              // 正式版请改为 false（隐藏退出登录）
   SPECIAL: ['13925599313', '19868735951'],   // 仅这两个号码可中手机
   TEST:   '19868735951',                     // 测试号：中手机后不封抽
   PHONE_DRAW_START: 5,                       // 第5次起手机才进奖池

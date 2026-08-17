@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Demo 2 · 多彩明快大转盘</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  min-height:100vh;color:#374151;overflow-x:hidden;
+  background:
+    radial-gradient(500px 300px at 10% 5%, #fde68a 0%, transparent 55%),
+    radial-gradient(500px 300px at 95% 15%, #a7f3d0 0%, transparent 55%),
+    radial-gradient(500px 350px at 15% 100%, #bae6fd 0%, transparent 55%),
+    radial-gradient(500px 350px at 90% 90%, #fbcfe8 0%, transparent 55%),
+    linear-gradient(180deg,#f6f8ff,#eef2ff);
+}
+.top{
+  text-align:center;padding:20px 16px 4px;
+}
+.top .banner{
+  background:linear-gradient(120deg,#ff6b6b,#f97316,#f59e0b,#10b981,#3b82f6,#8b5cf6,#ec4899);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  font-size:36px;font-weight:900;letter-spacing:2px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.12));
+}
+.top .sub{font-size:14px;color:#64748b;margin-top:8px;font-weight:600;}
+.wrap{display:flex;flex-direction:column;align-items:center;padding:16px 16px 30px;}
+.wheel-wrap{position:relative;width:min(90vw,400px);height:min(90vw,400px);margin-top:6px;}
+.pointer{position:absolute;top:-16px;left:50%;transform:translateX(-50%);z-index:6;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3));}
+.pointer svg{width:54px;height:54px;}
+#wheel{position:absolute;inset:0;border-radius:50%;}
+.center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;
+  width:112px;height:112px;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 30% 30%,#fff,#fff);
+  border:6px solid #fff;box-shadow:0 10px 26px rgba(0,0,0,.15);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f97316;font-weight:900;transition:transform .15s;
+}
+.center:active{transform:translate(-50%,-50%) scale(.88);}
+.center .t{font-size:13px;letter-spacing:2px;color:#64748b;}
+.center .g{font-size:34px;margin-top:2px;}
+.hint{font-size:14px;color:#64748b;margin-top:14px;font-weight:600;}
+.hint b{color:#f97316;font-size:18px;}
+.btn-row{display:flex;gap:12px;width:100%;max-width:420px;margin-top:16px;}
+.draw-btn,.fwd-btn{flex:1;padding:16px;border:none;border-radius:16px;font-size:17px;font-weight:800;cursor:pointer;color:#fff;background:linear-gradient(135deg,#f97316,#ef4444);box-shadow:0 8px 22px rgba(239,68,68,.35);}
+.draw-btn:active,.fwd-btn:active{transform:scale(.96);}
+.fwd-btn{background:linear-gradient(135deg,#06b6d4,#3b82f6);box-shadow:0 8px 22px rgba(59,130,246,.35);}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:420px;margin-top:16px;}
+.card{background:#fff;border-radius:16px;padding:14px 16px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.06);}
+.card .k{font-size:12px;color:#94a3b8;}
+.card .v{font-size:26px;font-weight:900;color:#f97316;margin-top:4px;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:20px;}
+.overlay.show{display:flex;}
+.modal{width:min(88vw,340px);border-radius:22px;text-align:center;padding:26px 22px;position:relative;transform:scale(.5);opacity:0;transition:.35s cubic-bezier(.2,.9,.3,1.4);background:#fff;color:#374151;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.overlay.show .modal{transform:scale(1);opacity:1;}
+.modal .pi{width:120px;height:120px;margin:0 auto 12px;}
+.modal .pi img{width:100%;height:100%;object-fit:contain;}
+.modal .m-title{font-size:22px;font-weight:900;color:#f97316;}
+.modal .m-sub{font-size:14px;color:#64748b;margin-top:8px;line-height:1.6;}
+.modal .ok{width:100%;margin-top:22px;padding:14px;border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:800;background:linear-gradient(135deg,#f97316,#ef4444);cursor:pointer;}
+.burst{position:absolute;width:7px;height:7px;border-radius:50%;opacity:0;pointer-events:none;}
+.burst.go{animation:burst .9s ease-out forwards;}
+@keyframes burst{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0;}}
+.confetti{position:absolute;top:-20px;left:50%;width:12px;height:12px;opacity:0;pointer-events:none;border-radius:2px;}
+.confetti.go{animation:cf .95s ease-in forwards;}
+@keyframes cf{0%{transform:translate(-50%,0) rotate(0);opacity:1;}100%{transform:translate(var(--fx),var(--fy)) rotate(720deg);opacity:0;}}
+.toast{position:fixed;top:40px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:99;padding:11px 22px;border-radius:30px;background:rgba(0,0,0,.8);color:#fff;font-size:14px;opacity:0;pointer-events:none;transition:.3s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="banner">🎉 幸运大转盘 🎉</div>
+    <div class="sub">vivo X200s 等你抽回家 · 5元/10元话费券</div>
+  </div>
+
+  <div class="wrap">
+    <div class="wheel-wrap" id="wheel-wrap">
+      <div class="pointer"><svg viewBox="0 0 56 56"><path d="M28 4 L44 42 A30 30 0 0 1 12 42 Z" fill="#ef4444" stroke="#fff" stroke-width="3"/></svg></div>
+      <canvas id="wheel"></canvas>
+      <div class="center" id="centerBtn"><span class="t">开始抽奖</span><span class="g">🎁</span></div>
+    </div>
+    <div class="hint">剩余 <b id="remain">3</b> 次 · 转发可再获次数</div>
+
+    <div class="btn-row">
+      <button class="draw-btn" id="drawBtn">🎯 开始抽奖</button>
+      <button class="fwd-btn" id="fwdBtn">📤 分享+1次</button>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="k">剩余次数</div><div class="v" id="cardTimes">3</div></div>
+      <div class="card"><div class="k">今日转发</div><div class="v" id="cardFwd">0</div></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="loseOverlay"><div class="modal">
+    <div class="pi"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='54' r='28' fill='%23f59e0b'/><circle cx='41' cy='49' r='3.5' fill='%237c2d12'/><circle cx='59' cy='49' r='3.5' fill='%237c2d12'/><path d='M38 60 q12 12 24 0' stroke='%237c2d12' stroke-width='3.5' fill='none' stroke-linecap='round'/></svg>"></div>
+    <div class="m-title">很遗憾，未中奖</div>
+    <div class="m-sub">感谢参与，分享给好友再获抽奖机会</div>
+    <button class="ok" data-close="loseOverlay">再接再厉</button>
+  </div></div>
+
+  <div class="overlay" id="couponOverlay"><div class="modal">
+    <div class="pi" id="couponImg"></div>
+    <div class="m-title">🎉 恭喜中奖</div>
+    <div class="m-sub" id="couponSub"></div>
+    <button class="ok" data-close="couponOverlay">开心收下</button>
+  </div></div>
+
+  <div class="overlay" id="phoneOverlay"><div class="modal" id="phoneModal">
+    <div class="pi"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><defs><linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23a5f3fc'/><stop offset='1' stop-color='%230284c7'/></linearGradient></defs><rect x='29' y='6' width='42' height='88' rx='11' fill='%23111'/><rect x='33' y='11' width='34' height='74' rx='6' fill='url(%23s)'/></svg>"></div>
+    <div class="m-title">🎉 恭喜抽中手机 🎉</div>
+    <div class="m-sub">vivo X200s 黑（12G+256G）</div>
+    <button class="ok" id="toAddr">填写收货地址</button>
+  </div></div>
+
+  <div id="toast" class="toast"></div>
+
+<script src="demo-core.js"></script>
+<script>
+var SLOTS=[
+ {name:'vivo X200s',img:'phone',  c1:'#fde047',c2:'#f59e0b'},
+ {name:'感谢参与',  img:'thanks', c1:'#ff6b6b',c2:'#dc2626'},
+ {name:'感谢参与',  img:'thanks', c1:'#fbbf24',c2:'#f97316'},
+ {name:'5元话费券', img:'coupon5',c1:'#34d399',c2:'#10b981'},
+ {name:'感谢参与',  img:'thanks', c1:'#60a5fa',c2:'#2563eb'},
+ {name:'感谢参与',  img:'thanks', c1:'#a78bfa',c2:'#7c3aed'},
+ {name:'10元话费券',img:'coupon10',c1:'#f472b6',c2:'#db2777'},
+ {name:'感谢参与',  img:'thanks', c1:'#22d3ee',c2:'#0891b2'}
+];
+var spinning=false;
+var wheel=Demo.build('wheel', SLOTS, {textColor:'#fff',centerColor:'#fff',ringColor:'#fff'});
+function pick(){ return Math.floor(Math.random()*SLOTS.length); }
+function doDraw(){ if(spinning)return; spinning=true; var idx=pick(); wheel.spin(idx); setTimeout(function(){show(idx);spinning=false;},4300); }
+function show(idx){ if(idx===0){showOverlay('phoneOverlay');burstFx(document.getElementById('phoneModal'));} else if(idx===3){coupon('5元话费券','coupon5');} else if(idx===6){coupon('10元话费券','coupon10');} else showOverlay('loseOverlay'); }
+function coupon(name,img){ $('#couponImg').innerHTML='<img src="'+Demo.IMG[img]+'">'; $('#couponSub').textContent='获得 '+name; showOverlay('couponOverlay'); }
+function $(id){return document.getElementById(id);}
+function showOverlay(id){$(id).classList.add('show');}
+function hideOverlay(id){$(id).classList.remove('show');}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(function(){t.classList.remove('show');},2200);}
+function burstFx(el){var cs=['#ffd700','#ff6b6b','#38bdf8','#34d399','#f472b6'];for(var i=0;i<36;i++){var b=document.createElement('div');b.className='burst';b.style.background=cs[i%cs.length];b.style.left=(50+Math.random()*40-20)+'%';b.style.top=(50+Math.random()*40-20)+'%';b.style.setProperty('--dx',(Math.random()*240-120)+'px');b.style.setProperty('--dy',(Math.random()*240-120)+'px');el.appendChild(b);(function(x){requestAnimationFrame(function(){x.classList.add('go');});})(b);setTimeout(function(){b.remove();},1000);}for(var j=0;j<14;j++){var c=document.createElement('div');c.className='confetti';c.style.background=cs[j%cs.length];c.style.setProperty('--fx',(Math.random()*280-140)+'px');c.style.setProperty('--fy',(240+Math.random()*180)+'px');el.appendChild(c);(function(x){requestAnimationFrame(function(){x.classList.add('go');});})(c);setTimeout(function(){c.remove();},1100);}}
+$('centerBtn').addEventListener('click',doDraw);
+$('drawBtn').addEventListener('click',doDraw);
+$('fwdBtn').addEventListener('click',function(){toast('📤 请分享给好友，稍候次数+1');});
+document.querySelectorAll('[data-close]').forEach(function(b){b.addEventListener('click',function(){hideOverlay(b.getAttribute('data-close'));});});
+$('toAddr').addEventListener('click',function(){hideOverlay('phoneOverlay');toast('📦 收货地址功能见正式版');});
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<title>幸运大转盘 · 抽奖活动</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ========== 登录屏 ========== -->
+  <div id="screen-login" class="screen active">
+    <div class="login-wrap">
+      <div class="login-logo"><i class="fa-solid fa-gift"></i></div>
+      <h1 class="login-title">幸运大转盘</h1>
+      <p class="login-sub">登记姓名与手机号，即可参与抽奖</p>
+
+      <div class="field">
+        <label><i class="fa-solid fa-user"></i> 姓名</label>
+        <input id="loginName" type="text" maxlength="20" placeholder="请输入您的姓名">
+      </div>
+      <div class="field">
+        <label><i class="fa-solid fa-phone"></i> 手机号</label>
+        <input id="loginPhone" type="tel" maxlength="11" inputmode="numeric" placeholder="请输入11位手机号">
+      </div>
+
+      <button id="loginBtn" class="primary-btn"><i class="fa-solid fa-right-to-bracket"></i> 登录 / 登记</button>
+
+      <div class="prize-strip">
+        <div class="strip-item gold"><i class="fa-solid fa-mobile-screen-button"></i><span>vivo X200s</span></div>
+        <div class="strip-item blue"><i class="fa-solid fa-ticket"></i><span>5元话费券</span></div>
+        <div class="strip-item green"><i class="fa-solid fa-ticket"></i><span>10元话费券</span></div>
+      </div>
+      <p class="login-tip">活动规则：每人初始3次抽奖，转发分享可再获次数</p>
+    </div>
+  </div>
+
+  <!-- ========== 主抽奖屏 ========== -->
+  <div id="screen-main" class="screen">
+    <div class="topbar">
+      <div>
+        <div class="title">🎁 幸运大转盘</div>
+        <div class="sub" id="userSub"></div>
+      </div>
+      <button class="icon-btn" id="toProfile"><i class="fa-solid fa-user"></i></button>
+    </div>
+
+    <div class="stage">
+      <div class="wheel-wrap" id="wheel-wrap">
+        <div class="wheel-pointer"><i class="fa-solid fa-caret-down"></i></div>
+        <canvas id="wheel" class="wheel"></canvas>
+        <div class="wheel-center" id="centerBtn">
+          <span class="tap-label">立即抽奖</span>
+          <span class="go"><i class="fa-solid fa-bolt"></i></span>
+        </div>
+      </div>
+
+      <div class="draw-hint">剩余 <b id="remain">0</b> 次抽奖机会</div>
+
+      <div class="info-cards">
+        <div class="card"><div class="k">剩余次数</div><div class="v orange" id="cardTimes">0</div></div>
+        <div class="card"><div class="k">今日转发</div><div class="v" id="cardFwd">0</div></div>
+      </div>
+
+      <button id="fwdBtn" class="fwd-btn"><i class="fa-solid fa-share-nodes"></i> 分享给好友，获得抽奖次数</button>
+    </div>
+  </div>
+
+  <!-- ========== 个人中心 ========== -->
+  <div id="screen-profile" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" id="backMain"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="title">个人中心</div>
+      <button class="icon-btn" id="logoutBtn" style="display:none"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+
+    <div class="profile-head">
+      <div class="avatar"><i class="fa-solid fa-user"></i></div>
+      <div class="p-name" id="pName"></div>
+      <div class="p-phone" id="pPhone"></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><b id="pTotalDraws">0</b><span>累计抽奖</span></div>
+      <div class="stat"><b id="pForwards">0</b><span>转发次数</span></div>
+      <div class="stat"><b id="pTimes">0</b><span>剩余次数</span></div>
+    </div>
+
+    <div class="prize-panel">
+      <div class="panel-title"><i class="fa-solid fa-gift"></i> 我的奖品</div>
+      <div id="prizeContent" class="prize-content"></div>
+    </div>
+  </div>
+
+  <!-- ========== 未中奖 ========== -->
+  <div class="overlay" id="loseOverlay"><div class="modal lose">
+    <div class="big-icon"><i class="fa-solid fa-face-meh"></i></div>
+    <div class="m-title">很遗憾，未中奖</div>
+    <div class="m-sub">感谢参与，转发分享可再获抽奖机会</div>
+    <button class="ok" data-close="loseOverlay">再接再厉</button>
+  </div></div>
+
+  <!-- ========== 中话费券 ========== -->
+  <div class="overlay" id="couponOverlay"><div class="modal win">
+    <div class="big-icon"><i class="fa-solid fa-ticket"></i></div>
+    <div class="m-title" id="couponTitle">🎉 恭喜中奖</div>
+    <div class="m-sub" id="couponSub"></div>
+    <button class="ok" data-close="couponOverlay">开心收下</button>
+  </div></div>
+
+  <!-- ========== 中手机 ========== -->
+  <div class="overlay" id="phoneOverlay"><div class="modal phone" id="phoneModal">
+    <div class="big-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+    <div class="m-title" style="color:#fbbf24;">🎉 恭喜抽中手机 🎉</div>
+    <div class="m-sub">vivo X200s 黑（12G+256G）</div>
+    <button class="ok" id="toAddressBtn">填写收货地址</button>
+  </div></div>
+
+  <!-- ========== 收货地址 ========== -->
+  <div class="overlay" id="addressOverlay"><div class="modal form">
+    <div class="m-title" style="margin-bottom:4px;">📦 填写收货信息</div>
+    <div class="m-sub">奖品：vivo X200s 黑（12G+256G）</div>
+    <div class="field">
+      <label>收件人</label>
+      <input id="addrName" type="text" maxlength="20" placeholder="收件人姓名">
+    </div>
+    <div class="field">
+      <label>联系电话</label>
+      <input id="addrPhone" type="tel" maxlength="11" placeholder="联系电话">
+    </div>
+    <div class="field">
+      <label>详细地址</label>
+      <textarea id="addrDetail" rows="3" placeholder="详细收货地址"></textarea>
+    </div>
+    <button class="ok" id="addrSubmit">确认提交</button>
+  </div></div>
+
+  <!-- ========== 转发 ========== -->
+  <div class="overlay" id="forwardOverlay"><div class="modal forward">
+    <div class="big-icon gold"><i class="fa-solid fa-share-nodes"></i></div>
+    <div class="m-title">分享给好友</div>
+    <div class="m-sub">请将该活动链接分享给好友，<br>转发成功后即可获得 <b>1 次</b> 抽奖机会</div>
+    <div class="countdown" id="fwdCount">10</div>
+    <div class="m-sub" id="fwdStatus">链接已复制，请前往分享…</div>
+  </div></div>
+
+  <div id="toast" class="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

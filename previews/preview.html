@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>抽奖系统 · 界面预览</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{--bg:#f4f6f9;--panel:#ffffff;--text:#1f2937;--sub:#6b7280;--btn:#f59e0b;--btn2:#f97316;--title:#111827;--btn-text:#fff;--ring:#e5e7eb;--shadow:0 10px 30px rgba(0,0,0,.12);}
+  body.theme-gold{--bg:#171008;--panel:rgba(255,255,255,.06);--text:#f7ecd7;--sub:#c9b98f;--btn:#f5b942;--btn2:#e8910b;--title:#fbd98a;--ring:rgba(255,215,120,.25);}
+  body.theme-tech{--bg:#0a0e1f;--panel:rgba(255,255,255,.05);--text:#d6e2ff;--sub:#7f8fc0;--btn:#2dd4bf;--btn2:#0ea5e9;--title:#7dd3fc;--ring:rgba(80,200,255,.25);}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+  .topbar{width:100%;max-width:480px;padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+  .title{font-size:20px;font-weight:700;color:var(--title);letter-spacing:1px;}
+  .sub{font-size:12px;color:var(--sub);margin-top:4px;}
+  .icon-btn{font-size:20px;color:var(--sub);background:none;border:none;padding:8px;border-radius:10px;}
+  .theme-switch{margin:16px 0 6px;display:flex;gap:10px;}
+  .theme-switch button{border:none;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;color:#fff;opacity:.55;transition:.2s;}
+  .theme-switch button.on{opacity:1;transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.25);}
+  .ts-gold{background:linear-gradient(135deg,#f5b942,#e8910b);}
+  .ts-fresh{background:linear-gradient(135deg,#38bdf8,#6366f1);}
+  .ts-tech{background:linear-gradient(135deg,#2dd4bf,#0ea5e9);}
+  .stage{flex:1;width:100%;max-width:480px;padding:18px 20px 30px;display:flex;flex-direction:column;align-items:center;}
+  .wheel-wrap{position:relative;width:min(86vw,360px);height:min(86vw,360px);}
+  .wheel-pointer{position:absolute;top:-12px;left:50%;transform:translateX(-50%);z-index:5;color:var(--btn);font-size:34px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3));}
+  .wheel{width:100%;height:100%;border-radius:50%;transition:transform 4.2s cubic-bezier(.12,.7,.08,1);}
+  .wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:112px;height:112px;border-radius:50%;z-index:4;background:radial-gradient(circle at 30% 30%,#fff,#eee);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.25);border:4px solid #fff;font-weight:800;color:#333;cursor:pointer;}
+  body.theme-gold .wheel-center{background:radial-gradient(circle at 30% 30%,#fff5d6,#eab84a);}
+  body.theme-tech .wheel-center{background:radial-gradient(circle at 30% 30%,#0ea5e9,#08306b);color:#eaf6ff;border-color:#7dd3fc;}
+  .wheel-center .tap-label{font-size:11px;font-weight:600;opacity:.8;letter-spacing:2px;}
+  .wheel-center .go{font-size:30px;margin-top:2px;line-height:1;}
+  .draw-hint{font-size:12px;color:var(--sub);margin-top:16px;text-align:center;}
+  .info-cards{margin-top:22px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .card{background:var(--panel);border:1px solid var(--ring);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);backdrop-filter:blur(6px);}
+  .card .k{font-size:12px;color:var(--sub);margin-bottom:6px;}
+  .card .v{font-size:22px;font-weight:800;}
+  .card .v.orange{color:var(--btn);}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{width:min(86vw,340px);border-radius:22px;text-align:center;padding:26px 22px;position:relative;transform:scale(.5);opacity:0;transition:.35s cubic-bezier(.2,.9,.3,1.4);background:var(--panel);border:1px solid var(--ring);color:var(--text);}
+  .overlay.show .modal{transform:scale(1);opacity:1;}
+  .modal .big-icon{font-size:58px;margin-bottom:8px;}
+  .modal .m-title{font-size:20px;font-weight:800;}
+  .modal .m-sub{font-size:14px;color:var(--sub);margin-top:8px;}
+  .modal .ok{width:100%;margin-top:20px;padding:13px;border:none;border-radius:14px;color:var(--btn-text);font-size:16px;font-weight:700;background:linear-gradient(135deg,var(--btn),var(--btn2));cursor:pointer;}
+  .modal.lose .big-icon{color:#9ca3af;}
+  .modal.win .big-icon{color:#f59e0b;}
+  .modal.phone .big-icon{color:#fbbf24;}
+  .lose .m-title{color:#9ca3af;}
+  .burst{position:absolute;width:6px;height:6px;border-radius:50%;opacity:0;pointer-events:none;}
+  .burst.go{animation:burst .9s ease-out forwards;}
+  @keyframes burst{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0;}}
+  .confetti{position:absolute;top:-20px;left:50%;width:10px;height:10px;opacity:0;pointer-events:none;}
+  .confetti.go{animation:cf .9s ease-in forwards;}
+  @keyframes cf{0%{transform:translate(-50%,0) rotate(0);opacity:1;}100%{transform:translate(var(--fx),var(--fy)) rotate(720deg);opacity:0;}}
+  footer{margin:6px 0 20px;font-size:11px;color:var(--sub);text-align:center;line-height:1.7;}
+  footer b{color:var(--btn);}
+</style>
+</head>
+<body class="theme-gold">
+  <div class="topbar">
+    <div><div class="title">🎁 幸运大转盘</div><div class="sub">抽奖系统 · 界面预览</div></div>
+    <button class="icon-btn"><i class="fa-solid fa-user"></i></button>
+  </div>
+  <div class="theme-switch">
+    <button class="ts-gold on" data-theme="gold">金色尊贵 A</button>
+    <button class="ts-fresh" data-theme="fresh">清新简约 B</button>
+    <button class="ts-tech" data-theme="tech">科技流光 C</button>
+  </div>
+  <div class="stage">
+    <div class="wheel-wrap">
+      <div class="wheel-pointer"><i class="fa-solid fa-caret-down"></i></div>
+      <svg id="wheel" class="wheel" viewBox="0 0 400 400"></svg>
+      <div class="wheel-center" id="centerBtn"><span class="tap-label">立即抽奖</span><span class="go"><i class="fa-solid fa-bolt"></i></span></div>
+    </div>
+    <div class="draw-hint">剩余 <b id="remain">3</b> 次 · 转发可再获次数</div>
+    <div class="info-cards">
+      <div class="card"><div class="k">剩余抽奖次数</div><div class="v orange" id="cardTimes">3</div></div>
+      <div class="card"><div class="k">今日已转发</div><div class="v" id="cardFwd">0</div></div>
+    </div>
+    <footer>中奖判定仅为演示 · 正式版中<br><b>vivo X200s</b> 仅特定账号第5次后可中(1/8)</footer>
+  </div>
+  <div class="overlay" id="loseOverlay"><div class="modal lose"><div class="big-icon"><i class="fa-solid fa-face-meh"></i></div><div class="m-title">很遗憾，未中奖</div><div class="m-sub">感谢参与，转发分享可再获抽奖机会</div><button class="ok" data-close="loseOverlay">再接再厉</button></div></div>
+  <div class="overlay" id="couponOverlay"><div class="modal win"><div class="big-icon"><i class="fa-solid fa-ticket"></i></div><div class="m-title" id="couponTitle">恭喜中奖</div><div class="m-sub" id="couponSub">获得 5元话费券</div><button class="ok" data-close="couponOverlay">开心收下</button></div></div>
+  <div class="overlay" id="phoneOverlay"><div class="modal phone" id="phoneModal"><div class="big-icon"><i class="fa-solid fa-mobile-screen-button"></i></div><div class="m-title" style="color:#fbbf24;">🎉 恭喜抽中手机 🎉</div><div class="m-sub">vivo X200s 黑（12G+256G）</div><button class="ok" data-close="phoneOverlay">填写收货地址</button></div></div>
+<script>
+const SLOTS=[
+{n:'vivo X200s',icon:'fa-mobile-screen-button',c:'#fbbf24',c2:'#d97706'},
+{n:'感谢参与',icon:'fa-face-smile',c:'#d1d5db',c2:'#9ca3af'},
+{n:'感谢参与',icon:'fa-face-smile',c:'#e5e7eb',c2:'#b0b6bf'},
+{n:'5元话费券',icon:'fa-ticket',c:'#38bdf8',c2:'#0284c7'},
+{n:'感谢参与',icon:'fa-face-smile',c:'#d1d5db',c2:'#9ca3af'},
+{n:'感谢参与',icon:'fa-face-smile',c:'#e5e7eb',c2:'#b0b6bf'},
+{n:'10元话费券',icon:'fa-ticket',c:'#34d399',c2:'#059669'},
+{n:'感谢参与',icon:'fa-face-smile',c:'#d1d5db',c2:'#9ca3af'}];
+const N=SLOTS.length,SEG=360/N;
+let wheelRotation=0,spinning=false,times=3;
+const svg=document.getElementById('wheel'),NS='http://www.w3.org/2000/svg';
+const CX=200,CY=200,R=190,IR=74;
+function polar(cx,cy,r,deg){const a=(deg-90)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+function wedgePath(cx,cy,r1,r2,a0,a1){const p=([x,y])=>`${x.toFixed(1)} ${y.toFixed(1)}`;const[x0,y0]=polar(cx,cy,r1,a0),[x1,y1]=polar(cx,cy,r1,a1);const[x2,y2]=polar(cx,cy,r2,a1),[x3,y3]=polar(cx,cy,r2,a0);return`M ${p([x0,y0])} A ${r1} ${r1} 0 0 1 ${p([x1,y1])} L ${p([x2,y2])} A ${r2} ${r2} 0 0 0 ${p([x3,y3])} Z`;}
+const slotIcons=[];
+function buildWheel(){SLOTS.forEach((s,i)=>{const a0=i*SEG,a1=a0+SEG;const grad=document.createElementNS(NS,'radialGradient');grad.setAttribute('id',`grad${i}`);grad.setAttribute('cx','50%');grad.setAttribute('cy','50%');grad.setAttribute('r','70%');const st=document.createElementNS(NS,'stop');st.setAttribute('offset','0%');st.setAttribute('stop-color',s.c);const st2=document.createElementNS(NS,'stop');st2.setAttribute('offset','100%');st2.setAttribute('stop-color',s.c2);grad.appendChild(st);grad.appendChild(st2);svg.appendChild(grad);const path=document.createElementNS(NS,'path');path.setAttribute('d',wedgePath(CX,CY,IR,R,a0,a1));path.setAttribute('fill',`url(#grad${i})`);svg.appendChild(path);const mid=a0+SEG/2;const[tx,ty]=polar(CX,CY,R*0.86,mid);const name=document.createElementNS(NS,'text');name.setAttribute('x',tx);name.setAttribute('y',ty);name.setAttribute('text-anchor','middle');name.setAttribute('fill','#fff');name.setAttribute('font-size',s.n.length>5?8.5:11);name.setAttribute('font-weight','700');name.setAttribute('transform',`rotate(${mid} ${tx} ${ty})`);name.textContent=s.n;svg.appendChild(name);const wrap=document.createElement('div');wrap.style.cssText='position:absolute;left:50%;top:50%;font-size:30px;color:#fff;transform:translate(-50%,-50%);opacity:0;z-index:2;';wrap.innerHTML=`<i class="fa-solid ${s.icon}"></i>`;document.querySelector('.wheel-wrap').appendChild(wrap);slotIcons.push({wrap,mid});});const ring=document.createElementNS(NS,'circle');ring.setAttribute('cx',CX);ring.setAttribute('cy',CY);ring.setAttribute('r',R+4);ring.setAttribute('fill','none');ring.setAttribute('stroke','rgba(255,255,255,.35)');ring.setAttribute('stroke-width','5');svg.appendChild(ring);positionIcons();}
+function positionIcons(){const box=document.querySelector('.wheel-wrap').getBoundingClientRect();const px=box.width/2,py=box.height/2,pr=box.width*0.62/2;slotIcons.forEach(ic=>{const a=(ic.mid-90)*Math.PI/180;const x=px+pr*Math.cos(a),y=py+pr*Math.sin(a);ic.wrap.style.left=x+'px';ic.wrap.style.top=y+'px';ic.wrap.style.opacity=1;});}
+window.addEventListener('resize',positionIcons);
+function pickSlot(){return Math.floor(Math.random()*N);}
+function spinTo(idx){const center=idx*SEG+SEG/2;const cur=((wheelRotation%360)+360)%360;const delta=(center-cur+360)%360;const total=wheelRotation+(5+Math.floor(Math.random()*3))*360+delta;document.getElementById('wheel').style.transform=`rotate(${total}deg)`;wheelRotation=total;}
+function doDraw(){if(spinning)return;if(times<=0){alert('次数不足，请先转发');return;}spinning=true;times--;document.getElementById('remain').textContent=times;document.getElementById('cardTimes').textContent=times;spinTo(pickSlot());setTimeout(()=>{showResult();spinning=false;},4300);}
+function showResult(){const cur=((wheelRotation%360)+360)%360;const idx=Math.round(cur/SEG)%N;const s=SLOTS[idx];if(s.n==='vivo X200s')showPhone();else if(s.n.includes('话费券'))showCoupon(s);else showLose();}
+function showLose(){document.getElementById('loseOverlay').classList.add('show');}
+function showCoupon(s){document.getElementById('couponSub').textContent=`获得 ${s.n}`;document.getElementById('couponOverlay').classList.add('show');}
+function showPhone(){document.getElementById('phoneOverlay').classList.add('show');burstFx(document.getElementById('phoneModal'));}
+function burstFx(el){const colors=['#ffd700','#ffaa00','#fff3b0','#ff6b6b','#38bdf8','#34d399'];for(let i=0;i<34;i++){const b=document.createElement('div');b.className='burst';b.style.background=colors[i%colors.length];b.style.left=(50+Math.random()*40-20)+'%';b.style.top=(50+Math.random()*40-20)+'%';b.style.setProperty('--dx',(Math.random()*220-110)+'px');b.style.setProperty('--dy',(Math.random()*220-110)+'px');el.appendChild(b);requestAnimationFrame(()=>b.classList.add('go'));setTimeout(()=>b.remove(),1000);}for(let i=0;i<12;i++){const c=document.createElement('div');c.className='confetti';c.style.background=['#fbbf24','#38bdf8','#34d399','#f472b6'][i%4];c.style.setProperty('--fx',(Math.random()*260-130)+'px');c.style.setProperty('--fy',(220+Math.random()*160)+'px');el.appendChild(c);requestAnimationFrame(()=>c.classList.add('go'));setTimeout(()=>c.remove(),1100);}}
+document.getElementById('centerBtn').addEventListener('click',doDraw);
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).classList.remove('show')));
+document.querySelectorAll('.theme-switch button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.theme-switch button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.body.className='theme-'+b.dataset.theme;}));
+const cb=document.getElementById('centerBtn');
+cb.addEventListener('pointerdown',()=>{cb.style.transform='translate(-50%,-50%) scale(.9)';});
+cb.addEventListener('pointerup',()=>{cb.style.transform='translate(-50%,-50%) scale(1)';});
+buildWheel();
+</script>
+</body>
+</html>
